@@ -29,12 +29,22 @@
  */
 - (void)waitUntilFinished;
 
+#if TARGET_OS_IPHONE
+/** Removes the file or directory at the specified path and immediately returns.
+ 
+ This method moves the given item to a temporary name which is an instant operation. It then schedules an asynchronous background operation to actually remove the item.
+ 
+ @param path A path string indicating the file or directory to remove. If the path specifies a directory, the contents of that directory are recursively removed.
+ @param launchBackgroundTask Whether or not a background task should be started for the operation.
+ */
+- (void)removeItemAtPath:(NSString *)path launchingBackgroundTask:(BOOL)launchBackgroundTask NS_EXTENSION_UNAVAILABLE("Background tasks are not supported in extensions!");
+#endif
 
 /** Removes the file or directory at the specified path and immediately returns.
  
  This method moves the given item to a temporary name which is an instant operation. It then schedules an asynchronous background operation to actually remove the item.
  
- @param path A path string indicating the file or directory to remove. If the path specifies a directory, the contents of that directory are recursively removed. 
+ @param path A path string indicating the file or directory to remove. If the path specifies a directory, the contents of that directory are recursively removed.
  */
 - (void)removeItemAtPath:(NSString *)path;
 

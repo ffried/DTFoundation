@@ -70,36 +70,57 @@ static DTAsyncFileDeleter *_sharedInstance;
 		{
 			// schedule the removal and immediately return
 			dispatch_group_async(_delGroup, _delQueue, ^{
-#if TARGET_OS_IPHONE && !defined(DT_APP_EXTENSIONS)
-				__block UIBackgroundTaskIdentifier backgroundTaskID = UIBackgroundTaskInvalid;
-				
-				// block to use for timeout as well as completed task
-				void (^completionBlock)() = ^{
-					[[UIApplication sharedApplication] endBackgroundTask:backgroundTaskID];
-					backgroundTaskID = UIBackgroundTaskInvalid;
-				};
-				
-				if ([self _supportsTaskCompletion])
-				{
-					// according to docs this is safe to be called from background threads
-					backgroundTaskID = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:completionBlock];
-				}
-#endif
-				
 				// file manager is not used any more in the rename queue, so we reuse it
 				[fileManager removeItemAtPath:tmpPath error:NULL];
-				
-#if TARGET_OS_IPHONE && !defined(DT_APP_EXTENSIONS)
-				// ... when the task completes:
-				if (backgroundTaskID != UIBackgroundTaskInvalid)
-				{
-					completionBlock();
-				}
-#endif
 			});
 		}
 	});
 }
+
+#if TARGET_OS_IPHONE
+- (void)removeItemAtPath:(NSString *)path launchingBackgroundTask:(BOOL)launchBackgroundTask {
+    // make a unique temporary name in tmp folder
+    NSString *tmpPath = [NSString pathForTemporaryFile];
+    
+    // rename the file, waiting for the rename to finish before async deletion
+    dispatch_sync(_renameQueue, ^{
+        NSFileManager *fileManager = [[NSFileManager alloc] init];
+        
+        if ([fileManager moveItemAtPath:path toPath:tmpPath error:NULL])
+        {
+            // schedule the removal and immediately return
+            dispatch_group_async(_delGroup, _delQueue, ^{
+                __block UIBackgroundTaskIdentifier backgroundTaskID = UIBackgroundTaskInvalid;
+                void (^completionBlock)() = nil;
+                if (launchBackgroundTask) {
+                    backgroundTaskID = UIBackgroundTaskInvalid;
+                    
+                    // block to use for timeout as well as completed task
+                    completionBlock = ^{
+                        [[UIApplication sharedApplication] endBackgroundTask:backgroundTaskID];
+                        backgroundTaskID = UIBackgroundTaskInvalid;
+                    };
+                    
+                    if ([self _supportsTaskCompletion])
+                    {
+                        // according to docs this is safe to be called from background threads
+                        backgroundTaskID = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:completionBlock];
+                    }
+                }
+                
+                // file manager is not used any more in the rename queue, so we reuse it
+                [fileManager removeItemAtPath:tmpPath error:NULL];
+                
+                // ... when the task completes:
+                if (launchBackgroundTask && backgroundTaskID != UIBackgroundTaskInvalid && completionBlock != nil)
+                {
+                    completionBlock();
+                }
+            });
+        }
+    });
+}
+#endif
 
 - (void)removeItemAtURL:(NSURL *)URL
 {

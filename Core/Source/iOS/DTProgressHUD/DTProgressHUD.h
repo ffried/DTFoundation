@@ -62,6 +62,7 @@ typedef NS_ENUM(NSUInteger, HUDProgressType)
  
  There is no need to call addSubview on Superview of 'DTProgressHUD'. Creates own 'UIWindow' for displaying similar to 'UIAlertView'
  */
+NS_EXTENSION_UNAVAILABLE("Unavailable in extensions")
 @interface DTProgressHUD : UIView
 
 /**

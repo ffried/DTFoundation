@@ -11,6 +11,7 @@
 /**
  Class for correcting rotations when using UIWindow in iOS
  */
+NS_EXTENSION_UNAVAILABLE("Unavailable in extensions")
 @interface DTProgressHUDWindow : UIWindow
 
 /**
