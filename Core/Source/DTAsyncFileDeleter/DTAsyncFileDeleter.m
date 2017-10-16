@@ -91,7 +91,7 @@ static DTAsyncFileDeleter *_sharedInstance;
             // schedule the removal and immediately return
             dispatch_group_async(_delGroup, _delQueue, ^{
                 __block UIBackgroundTaskIdentifier backgroundTaskID = UIBackgroundTaskInvalid;
-                void (^completionBlock)() = nil;
+                void (^completionBlock)(void) = nil;
                 if (launchBackgroundTask) {
                     backgroundTaskID = UIBackgroundTaskInvalid;
                     

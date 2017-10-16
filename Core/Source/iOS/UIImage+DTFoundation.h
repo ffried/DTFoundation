@@ -51,7 +51,7 @@
  @param error An optional output parameter to return an error if the loading fails
  @returns The image object for the specified URL, or nil if the method could not load the specified image.
  */
-+ (UIImage *)imageWithContentsOfURL:(NSURL *)URL cachePolicy:(NSURLRequestCachePolicy)cachePolicy error:(NSError **)error;
++ (UIImage *)imageWithContentsOfURL:(NSURL *)URL cachePolicy:(NSURLRequestCachePolicy)cachePolicy error:(NSError * __autoreleasing *)error;
 
 
  /**
